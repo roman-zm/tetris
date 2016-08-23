@@ -2,7 +2,7 @@
 #include <ctime>
 #include <cstdlib>
 
-const int max = 8;
+const int max = 12;
 
 char table[max][max];
 
@@ -97,7 +97,9 @@ void print_table(){
 }
 
 void move_right(){
-    if (pos[0][1] < max-1 && pos[1][1] < max-1){
+    //if (pos[0][1] < max-1 && pos[1][1] < max-1 && pos[2][1] < max-1 && pos[3][1] < max - 1 && ){
+    if(table[pos[1][0]][pos[1][1]+1] == ' ' && table[pos[3][0]][pos[3][1]+1] == ' ' &&
+            pos[1][1] < max-1 && pos[3][1] < max - 1){
         for(int i =0; i<4; i++){
             for(int j =0; j<2; j++){
                 prev_pos[i][j] = pos[i][j];
@@ -106,11 +108,18 @@ void move_right(){
         for(int i = 0; i<4; i++){
             pos[i][1]+=1;
         }
+    } else {
+        for(int i =0; i<4; i++){
+            for(int j =0; j<2; j++){
+                prev_pos[i][j] = pos[i][j];
+            }
+        }
     }
 }
 
 void move_left(){
-    if (pos[0][1] > 0 && pos[1][1] > 0){
+    if (pos[0][1] > 0 && pos[2][1] > 0 &&
+            table[pos[0][0]][pos[0][1]-1] == ' ' && table[pos[2][0]][pos[2][1]-1] == ' ' ){
         for(int i =0; i<4; i++){
             for(int j =0; j<2; j++){
                 prev_pos[i][j] = pos[i][j];
@@ -118,6 +127,27 @@ void move_left(){
         }
         for(int i = 0; i<4; i++){
             pos[i][1]-=1;
+        }
+    } else {
+        for(int i =0; i<4; i++){
+            for(int j =0; j<2; j++){
+                prev_pos[i][j] = pos[i][j];
+            }
+        }
+    }
+}
+
+void fall_down(){
+    if(table[pos[2][0]+1][pos[2][1]] ==' ' && table[pos[3][0]+1][pos[3][1]]==' ' ){
+        for(int i =0; i<4; i++){
+            for(int j =0; j<2; j++){
+                prev_pos[i][j] = pos[i][j];
+            }
+        }
+        while(table[pos[2][0]+1][pos[2][1]] ==' ' && table[pos[3][0]+1][pos[3][1]]==' ' ){
+            for(int i = 0; i<4; i++){
+                pos[i][0]+=1;
+            }
         }
     }
 }
@@ -133,7 +163,13 @@ void move_error(){
 void move_down(){
     if(secnds < time(NULL)){
         secnds = time(NULL);
-        if(table[pos[2][0]+1][pos[2][1]] ==' ' && table[pos[3][0]+1][pos[3][1]]==' ' ){
+        if(table[pos[2][0]+1][pos[2][1]] ==' ' && table[pos[3][0]+1][pos[3][1]]==' ' &&
+                table[pos[1][0]+1][pos[1][1]] ==' ' && table[pos[0][0]+1][pos[0][1]] ==' '){
+            for(int i =0; i<4; i++){
+                for(int j =0; j<2; j++){
+                    prev_pos[i][j] = pos[i][j];
+                }
+            }
             for(int i = 0; i<4; i++){
                 pos[i][0]+=1;
             }
@@ -169,6 +205,9 @@ int main()
                 break;
             case KEY_LEFT:
                 move_left();
+                break;
+            case KEY_DOWN:
+                fall_down();
                 break;
             case ERR:
                 move_error();
