@@ -2,6 +2,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <unistd.h>
 
 const int max = 18;
 
@@ -31,6 +32,30 @@ const int upos[4][2] = {
 int pos[4][2], prev_pos[4][2];
 std::vector<int> right_blocks, left_blocks, down_blocks;
 time_t secnds = time(NULL);
+
+
+void rotate(){
+    for(int i =0; i<4; i++){
+        for(int j =0; j<2; j++){
+            prev_pos[i][j] = pos[i][j];
+        }
+    }
+/*    int maxi = 0;
+    for(int i=0; i<4; i++){
+        for(int j=0; j<4; j++){
+            if(abs(pos[i][1]-pos[j][1])+1 > maxi&& pos[i][1]>=pos[j][1]) maxi=abs(pos[i][1]-pos[j][1])+1;
+            else maxi=abs(pos[j][1]-pos[i][1])+1;
+        }
+        for(int j=0; j<4; j++){
+            if(abs(pos[i][0]-pos[j][0])+1 > maxi&& pos[i][0]>=pos[j][0]) maxi=abs(pos[i][0]-pos[j][0])+1;
+            else maxi=abs(pos[j][0]-pos[i][0])+1;
+        }
+    }*/
+    for(int i=0; i<4; i++){
+        pos[i][0] = prev_pos[i][1];
+        pos[i][1] = max - prev_pos[i][0];
+    }
+}
 
 
 void add_figure(){
@@ -319,6 +344,9 @@ int main(){
                 break;
             case KEY_DOWN:
                 fall_down();
+                break;
+            case KEY_UP:
+                rotate();
                 break;
             case ERR:
                 move_error();
