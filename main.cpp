@@ -30,30 +30,41 @@ const int upos[4][2] = {
 };
 
 int pos[4][2], prev_pos[4][2];
-std::vector<int> right_blocks, left_blocks, down_blocks;
+std::vector<int> right_blocks, left_blocks, down_blocks, up_blocks;
 time_t secnds = time(NULL);
 
 
 void rotate(){
-    for(int i =0; i<4; i++){
+    int buff_pos[4][2];
+    for(int i =0; i<4; i++){        //Сохранение положения
         for(int j =0; j<2; j++){
             prev_pos[i][j] = pos[i][j];
         }
     }
-/*    int maxi = 0;
+
+    int lft=max, upr=max;
+    for(size_t i=0; i<left_blocks.size();i++){
+        if(pos[left_blocks[i]][1]<=lft) lft=pos[left_blocks[i]][1];
+    }
+
+    for(size_t i=0; i<up_blocks.size();i++){
+        if(pos[up_blocks[i]][0]<=upr) upr=pos[up_blocks[i]][0];
+    }
+
+    for(int i=0; i<4;i++){
+        buff_pos[i][1]=pos[i][0]-upr;
+        buff_pos[i][0]=pos[i][1]-lft;
+    }
+
+    int box_size = 0;
     for(int i=0; i<4; i++){
-        for(int j=0; j<4; j++){
-            if(abs(pos[i][1]-pos[j][1])+1 > maxi&& pos[i][1]>=pos[j][1]) maxi=abs(pos[i][1]-pos[j][1])+1;
-            else maxi=abs(pos[j][1]-pos[i][1])+1;
-        }
-        for(int j=0; j<4; j++){
-            if(abs(pos[i][0]-pos[j][0])+1 > maxi&& pos[i][0]>=pos[j][0]) maxi=abs(pos[i][0]-pos[j][0])+1;
-            else maxi=abs(pos[j][0]-pos[i][0])+1;
-        }
-    }*/
+        if(buff_pos[i][0] >= box_size) box_size=buff_pos[i][0];
+        if(buff_pos[i][1] >= box_size) box_size=buff_pos[i][1];
+    }
+
     for(int i=0; i<4; i++){
-        pos[i][0] = prev_pos[i][1];
-        pos[i][1] = max - prev_pos[i][0];
+        pos[i][0] = buff_pos[i][0]+upr;
+        pos[i][1] = box_size - buff_pos[i][1]+lft;
     }
 }
 
@@ -208,14 +219,12 @@ bool is_free_down(){
 }
 
 void fall_down(){
-    //if(table[pos[2][0]+1][pos[2][1]] ==' ' && table[pos[3][0]+1][pos[3][1]]==' ' )
     if(is_free_down()){
         for(int i =0; i<4; i++){
             for(int j =0; j<2; j++){
                 prev_pos[i][j] = pos[i][j];
             }
         }
-        //while(table[pos[2][0]+1][pos[2][1]] ==' ' && table[pos[3][0]+1][pos[3][1]]==' ' )
         while(is_free_down()){
             for(int i = 0; i<4; i++){
                 pos[i][0]+=1;
@@ -241,6 +250,7 @@ void move_down(){
                     prev_pos[i][j] = pos[i][j];
                 }
             }
+
             for(int i = 0; i<4; i++){
                 pos[i][0]+=1;
             }
@@ -255,8 +265,9 @@ void analyze_figure(){
     left_blocks.clear();
     right_blocks.clear();
     down_blocks.clear();
+    up_blocks.clear();
 
-    int lmin, rmin, dmin;
+    int lmin, rmin, dmin, umin;
     for(int i=0; i<4; i++){         //Левые и правые блоки
         int lminint = max;
         int rminint = 0;
@@ -297,16 +308,25 @@ void analyze_figure(){
 
     for(int i=0; i<4; i++){
         int dminint = 0;
+        int uminint = max;
         for(int j=0; j<4; j++){
             if(pos[i][1] == pos[j][1]){
                 if(pos[i][0] < pos[j][0] && pos[j][0] > dminint){
                     dmin = j;
                     dminint=pos[j][0];
                 }
+                if(pos[i][0] > pos[j][0] && pos[j][0] < uminint){
+                    umin = j;
+                    uminint=pos[j][0];
+                }
                 if(pos[i][0] == pos[j][0]){
                     if(pos[j][0] > dminint){
                         dmin = j;
                         dminint=pos[j][0];
+                    }
+                    if(pos[j][0] <uminint){
+                        umin = j;
+                        uminint=pos[j][0];
                     }
                 }
             }
@@ -315,6 +335,11 @@ void analyze_figure(){
         for(size_t i=0; i<down_blocks.size(); i++)
             if(down_blocks[i]==dmin) insrts = true;
         if(!insrts) down_blocks.push_back(dmin);
+
+        insrts = false;
+        for(size_t i=0; i<up_blocks.size(); i++)
+            if(up_blocks[i]==umin) insrts = true;
+        if(!insrts) up_blocks.push_back(umin);
     }
 }
 
@@ -358,7 +383,6 @@ int main(){
         erase_line();
         analyze_figure();
         write_figure();
-
     }//конец while(true)
 
     endwin();
